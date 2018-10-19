@@ -17,8 +17,8 @@ Sys.setenv(TZ = "America/Chicago")
 options(width = 160)
 
 
-boxscore <- read_csv("https://github.com/nntrn/another-nfl-player-prop/blob/master/nfl-player-prop/data/boxscore.csv")
-calendar <- read_csv("https://github.com/nntrn/another-nfl-player-prop/blob/master/nfl-player-prop/data/calendar.csv")
-player_games <- read_csv("https://github.com/nntrn/another-nfl-player-prop/blob/master/nfl-player-prop/data/player_games.csv")
-season_games <- read_csv("https://github.com/nntrn/another-nfl-player-prop/blob/master/nfl-player-prop/data/season_games.csv")
+boxscore <- read_csv("./nfl-player-prop/data/boxscore.csv")
+calendar <- read_csv("./nfl-player-prop/data/calendar.csv")
+player_games <- read_csv("./nfl-player-prop/data/player_games.csv")
+season_games <- read_csv("./nfl-player-prop/data/season_games.csv")
 
