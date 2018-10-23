@@ -1,4 +1,2 @@
-# another-nfl-player-prop
+# player-props
 data for making player prop bets
-
-[view shiny app](https://nntrn.shinyapps.io/nfl-player-prop-2/)

@@ -13,3 +13,5 @@ getCalendar <- function(){
     
 }
 calendar <- getCalendar()
+
+write.csv(calendar, file = "./nfl-player-prop/data/calendar.csv",row.names = FALSE)

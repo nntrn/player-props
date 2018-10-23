@@ -17,10 +17,6 @@ Sys.setenv(TZ = "America/Chicago")
 options(width = 160)
 
 
-# get game_ids from nflscrapR
-g_id <- extracting_gameids(2018, playoffs = FALSE)
-
-
 ## getGames() ====================
 
 getGames <- function(gameid) {
@@ -78,8 +74,17 @@ getGames <- function(gameid) {
 }
 
 
+## boxscore + player_games ====================
 
-## boxscore 2 (bs + gs_final) ====================
+# get game_ids from nflscrapR
+g_id <- extracting_gameids(2018, playoffs = FALSE)
+
+remove_gid <- format(Sys.Date(), "%Y%m%d00")
+
+g_id <- g_id %>%
+    subset(remove_gid != g_id) %>%
+    unique()
+
 
 bs <- list()
 pg <- list()
@@ -98,8 +103,8 @@ rm(bs,pg)
 season_games <- season_games(2018)
 
 
+#write.csv(calendar, file = "./data/calendar.csv",row.names = FALSE)
+write.csv(boxscore, file = "./nfl-player-prop/data/boxscore.csv",row.names = FALSE)
+write.csv(player_games, file = "./nfl-player-prop/data/player_games.csv",row.names = FALSE)    
+write.csv(season_games, file = "./nfl-player-prop/data/season_games.csv",row.names = FALSE)   
 
-write.csv(calendar, file = "./data/calendar.csv",row.names = FALSE)
-write.csv(boxscore, file = "./data/boxscore.csv",row.names = FALSE)
-write.csv(player_games, file = "./data/player_games.csv",row.names = FALSE)    
-write.csv(season_games, file = ".p/data/season_games.csv",row.names = FALSE)    

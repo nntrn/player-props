@@ -1,6 +1,3 @@
-library(tinytex)
-library(nflscrapR)
-library(XML)
 library(dplyr)
 library(jsonlite)
 library(tidyverse)
@@ -11,14 +8,17 @@ library(DT)
 library(shiny)
 library(htmltools)
 library(psych)
+require(RCurl)
 
 options(stringsAsFactors = FALSE)
 Sys.setenv(TZ = "America/Chicago")
 options(width = 160)
 
+base <- "https://raw.githubusercontent.com/nntrn/player-props/master/nfl-player-prop/data/"
 
-boxscore <- read_csv("./nfl-player-prop/data/boxscore.csv")
-calendar <- read_csv("./nfl-player-prop/data/calendar.csv")
-player_games <- read_csv("./nfl-player-prop/data/player_games.csv")
-season_games <- read_csv("./nfl-player-prop/data/season_games.csv")
+boxscore <- read.csv(text=getURL(paste0(base,"boxscore.csv")))
+calendar <- read.csv(text=getURL(paste0(base,"calendar.csv")))
+player_games <- read.csv(text=getURL(paste0(base,"player_games.csv")))
+season_games <- read.csv(text=getURL(paste0(base,"season_games.csv")))
+
 

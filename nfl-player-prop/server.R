@@ -40,7 +40,7 @@ shinyServer(function(input, output) {
     
     output$games <- DT::renderDataTable({
         gd2 <- game_data() %>%
-            select(-c(date, games_id,field)) %>%
+            select(-c(date, games_id, field, Q5)) %>%
             rename(total = team_total, both = total) %>%
             arrange(team, week)
         
@@ -51,8 +51,8 @@ shinyServer(function(input, output) {
           thead(
             tr(
               id = "first-row",
-              th(colspan = ncol(gd2) - 10, ""),
-              th(colspan = 5, class = "box", "quarter"),
+              th(colspan = ncol(gd2) - 9, ""),
+              th(colspan = 4, class = "box", "quarter"),
               th(colspan = 2, class = "box", "score"),
               th(colspan = 3, class = "box", "scoring type")
             ),
@@ -70,17 +70,17 @@ shinyServer(function(input, output) {
             extensions = "Scroller",
             options = list(
                 dom = "t",
-                scrollY = 250,
+                scrollY = 200,
                 scrollX = TRUE,
                 scroller = TRUE
             )
         ) %>%
-            formatStyle(c("Q1", "Q2", "Q3", "Q4", "Q5"), 
+            formatStyle(c("Q1", "Q2", "Q3", "Q4"), 
                         backgroundColor = styleInterval(0, c("#fff", "#f0f1f4")))
     })
     
     
-    
+## QUARTER SUMMARY =======    
         output$summary <- renderPrint({
           statsum <- game_data() %>% rename(TT=team_total)
           
@@ -92,9 +92,10 @@ shinyServer(function(input, output) {
                   })
               ))
         })
-
-
+        
+## PASS STAT =======
         output$pass_summary <- renderPrint({
+            
           players <- player_data() %>%
             select(week, team = Team, opp, name, starts_with("pass")) %>%
             select(-contains("two")) %>%
@@ -105,12 +106,12 @@ shinyServer(function(input, output) {
         
           do.call("rbind", as.list(
             by(players, list(team = players$name), function(x) {
-              y <- subset(x, select = att:ints)
+              y <- subset(x, select = att:tds)
               apply(y, 2, input$agg) %>% round(1)
             })
           ))
         })
-        
+## RUSH STAT =======  
         output$rush_summary <- renderPrint({
             players <- player_data() %>%
                 select(week, team = Team, opp, name, starts_with("rush")) %>%
@@ -127,7 +128,7 @@ shinyServer(function(input, output) {
                 })
             ))
         })
-        
+## REC STAT =======        
         output$rec_summary <- renderPrint({
             players <- player_data() %>%
                 select(week, team = Team, opp, name, starts_with("rec")) %>%
@@ -144,9 +145,8 @@ shinyServer(function(input, output) {
             ))
         })
         
+## PLAYERS TABLE  =======      
         
-    # this is the output for quarterbacks 
-    # filter for pass data 
     output$players <- DT::renderDataTable({
         pass_df <- player_data() %>%
             select(week, team = Team, opp, name, starts_with(input$prop), tds
@@ -156,19 +156,18 @@ shinyServer(function(input, output) {
             select(everything(),tds) %>%
             arrange(team, name, week)
         
-        if(input$prop=="pass"){
+        if(input$prop == "pass"){
             pass_df <- pass_df %>% subset(pass.att>0) %>%
                 mutate(tds=tds-pass.tds)
         }
-        if(input$prop=="rush"){
+        if(input$prop == "rush"){
             pass_df <- pass_df %>% subset(rush.att>0)
         }
-        if(input$prop=="rec"){
+        if(input$prop == "rec"){
             pass_df <- pass_df %>% subset(recept>0|recyds>0)
         }
         
-        
-        
+
         DT::datatable( # use drop = FALSE to preserve the original dimensions
             pass_df[, drop = FALSE, ],
             rownames = FALSE,
@@ -176,10 +175,10 @@ shinyServer(function(input, output) {
             extensions = "Responsive",
             options = list(
                 pageLength = 50
+                )
             )
-
-        )
-    }) 
+        
+        }) 
     
     
     
