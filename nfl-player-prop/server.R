@@ -40,7 +40,7 @@ shinyServer(function(input, output) {
     
     output$games <- DT::renderDataTable({
         gd2 <- game_data() %>%
-            select(-c(date, games_id)) %>%
+            select(-c(date, games_id,field)) %>%
             rename(total = team_total, both = total) %>%
             arrange(team, week)
         
@@ -70,7 +70,7 @@ shinyServer(function(input, output) {
             extensions = "Scroller",
             options = list(
                 dom = "t",
-                scrollY = 300,
+                scrollY = 250,
                 scrollX = TRUE,
                 scroller = TRUE
             )
@@ -170,16 +170,14 @@ shinyServer(function(input, output) {
         
         
         DT::datatable( # use drop = FALSE to preserve the original dimensions
-            pass_df[, drop = TRUE, ],
+            pass_df[, drop = FALSE, ],
             rownames = FALSE,
             class = "cell-border compact",
-            extensions = "Scroller",
-            
+            extensions = "Responsive",
             options = list(
-                scrollY =300,
-                scrollX = TRUE,
-                scroller = TRUE
+                pageLength = 50
             )
+
         )
     }) 
     

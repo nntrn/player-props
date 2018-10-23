@@ -1,5 +1,5 @@
 
-fixedPage(
+fluidPage(
   title = "nfl player props | @nntrn",
 
   tags$head(
@@ -13,35 +13,33 @@ fixedPage(
   helpText(a("nntrn.me", href = "http://nntrn.me")),
   
   
-  fixedRow(
-      column(12, titlePanel("(another) nfl player prop"))
+  fluidRow(
+      column(12, 
+             titlePanel("(another) nfl player prop"),
+             selectInput("select_team", "team (select multiple)", 
+                         choices = sort(unique(boxscore$team)), 
+                         multiple = TRUE, selected = c("LA", "KC")),
+             DT::dataTableOutput("games")
+             )
       ),
 
-    
-    fixedRow(
-        column(12, 
-               DT::dataTableOutput("games"),
-               column(4,
-                      selectInput("select_team", "team (select multiple)", 
-                                  choices = sort(unique(boxscore$team)), 
-                                  multiple = TRUE, selected = c("LA", "KC")),
-                      radioButtons("prop", "prop type:", c("pass", "rush","rec"), selected="pass", inline=TRUE)
-                      ),
-               
-               
-               column(4, verbatimTextOutput("summary")),
+    column(9,
+           fluidRow(
+               radioButtons("prop", "prop type:", c("pass", "rush","rec"), selected="rec", inline=TRUE),
                DT::dataTableOutput("players")
-        )),
+               )
+           ),
+    
+    column(3,
+         fluidRow(
+             radioButtons("agg", "aggregate:", c("sum", "mean","min", "max"), selected="sum", inline=TRUE),
+             verbatimTextOutput("summary"),
+             h4("passing"), verbatimTextOutput("pass_summary"),
+             h4("rushing"), verbatimTextOutput("rush_summary"),
+             h4("receiving"), verbatimTextOutput("rec_summary")
+             ) #fluidRow
+         ) #column
   
-  fixedRow(
-      column(12,
-             column(12,radioButtons("agg", "aggregate:", c("sum", "mean","min", "max"),selected="sum", inline=TRUE)),
-             column(4, h4("passing"), verbatimTextOutput("pass_summary")),
-             column(4, h4("rushing"), verbatimTextOutput("rush_summary")),
-             column(4,  h4("receiving"), verbatimTextOutput("rec_summary"))
-          )
-     
-  )
 )
 
 
