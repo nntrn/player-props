@@ -1,3 +1,7 @@
+* {
+    outline: 0
+}
+
 html {
     font-family: sans-serif;
     -webkit-text-size-adjust: 100%;
@@ -67,23 +71,47 @@ table.dataTable.cell-border tbody th,table.dataTable.cell-border tbody td {
     border: 1px solid #ddd;
 }
 
-
 .col-sm-4 {
     border: 0px solid black;
-
     width: 33.33333333%;
     display: table !important;
     box-sizing: border-box;
-    background:;
-
+    background: ;
 }
 
-.row{margin:20px 0;}
+.row {
+    margin: 20px 0;
+}
 
-.datatables,
-.dataTables_wrapper {margin:20px 0;}
+.datatables, .dataTables_wrapper {
+    margin: 20px 0;
+}
 
-h4{
-    margin:0px;
-    padding:0px;
+h4 {
+    margin: 0px;
+    padding: 0px;
+}
+
+input[type=search] {
+    border: 1px solid #ddd;
+}
+
+/* responsive DT */
+table.dataTable.dtr-inline.collapsed>tbody>tr>td:first-child:before,table.dataTable.dtr-inline.collapsed>tbody>tr>th:first-child:before {
+    box-sizing: border-box!important;
+    color: #444!important;
+    height: 10px!important;
+    width: 10px!important;
+    left: 0!important;
+    background-color: #fff!important;
+    box-shadow: 0 0 0px #444!important;
+    border: 0px solid white!important;
+    display: none!important;
+}
+
+/* end  */
+
+
+body table.dataTable tr.selected td, table.dataTable td.selected {
+    background-color: #f2f2f2 !important;
 }
