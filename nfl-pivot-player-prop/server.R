@@ -1,29 +1,29 @@
-
 library(shiny)
 
-
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
     
     dat_table <- reactive({
-       # df <- eval(parse(df <- input$select_table))
+        # get user selected table
         df <- get(input$select_table)
         
-        if(input$select_table=="player_games"){
-            df <- player_games %>% 
+        if (input$select_table == "player_games") {
+            df <- player_games %>%
                 mutate(
                     # this function gets the week numbers
-                    week = sapply(date, function(x) {calendar$label[x >= calendar$startDate & x <= calendar$endDate] })) %>%
-                #filter(Team %in% c("ATL","LA")) %>% 
-                select(game.id, week, Team, name, starts_with("pass"), starts_with("rush"), starts_with("rec")) %>% 
-                select(-contains("two")) %>% 
-                filter(rowSums(select(., starts_with("rec"),starts_with("rush"), starts_with("pass"))) > 0) 
-        }
+                    week = sapply(date, function(x) {
+                        calendar$label[x >= calendar$startDate & x <= calendar$endDate]
+                        })
+                    ) %>%
+                # filter(Team %in% c("ATL","LA")) %>%
+                select(game.id, week, Team, name, starts_with("pass"), starts_with("rush"), starts_with("rec")) %>%
+                select(-contains("two")) %>%
+                filter(rowSums(select(., starts_with("rec"), starts_with("rush"), starts_with("pass"))) > 0)
+            }
         
-        m.df = melt(df, id.vars = 1:4)
+        m.df <- melt(df, id.vars = 1:4)
         colnames(m.df) <- colnames(m.df) %>% tolower()
         m.df
-    })
+        })
     
     dat <- reactive({ 
         gd <- dat_table() %>%
