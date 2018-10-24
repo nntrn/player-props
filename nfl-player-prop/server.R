@@ -32,6 +32,7 @@ shinyServer(function(input, output) {
             ) %>%
             left_join(boxscore[c("games_id", "team", "opp")], 
                       by = c("game.id" = "games_id", "Team" = "team")) %>%
+            select(everything(), rush.tds = rushtds) %>%
             select(-c(game.id, playerID)) 
         
         
@@ -99,7 +100,7 @@ shinyServer(function(input, output) {
           players <- player_data() %>%
             select(week, team = Team, opp, name, starts_with("pass")) %>%
             select(-contains("two")) %>%
-            filter(pass.att > 0) %>%
+            filter(pass.att > 3) %>%
             arrange(team, name, week)
         
           colnames(players) <- gsub("(pass\\.|pass)", "", colnames(players))
@@ -174,10 +175,11 @@ shinyServer(function(input, output) {
             class = "cell-border compact",
             extensions = "Responsive",
             options = list(
-                pageLength = 50
+                pageLength = 25
                 )
-            )
-        
+            ) %>%
+            formatStyle(paste0(input$prop,".tds"), backgroundColor = styleInterval(0, c("#fff", "#FCFC62"))) %>%
+            formatStyle(c("tds"), backgroundColor = styleInterval(0, c("#fff", "#f0f1f4")))
         }) 
     
     
