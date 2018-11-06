@@ -158,7 +158,7 @@ shinyServer(function(input, output) {
             arrange(team, name, week)
         
         if(input$prop == "pass"){
-            pass_df <- pass_df %>% subset(pass.att>0) %>%
+            pass_df <- pass_df %>% subset(pass.att>3) %>%
                 mutate(tds=tds-pass.tds)
         }
         if(input$prop == "rush"){
@@ -168,7 +168,6 @@ shinyServer(function(input, output) {
             pass_df <- pass_df %>% subset(recept>0|recyds>0)
         }
         
-
         DT::datatable( # use drop = FALSE to preserve the original dimensions
             pass_df[, drop = FALSE, ],
             rownames = FALSE,
@@ -181,7 +180,6 @@ shinyServer(function(input, output) {
             formatStyle(paste0(input$prop,".tds"), backgroundColor = styleInterval(0, c("#fff", "#FCFC62"))) %>%
             formatStyle(c("tds"), backgroundColor = styleInterval(0, c("#fff", "#f0f1f4")))
         }) 
-    
     
     
     
