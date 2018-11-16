@@ -1,5 +1,7 @@
 library(tinytex)
 library(nflscrapR)
+library(readr)
+library(RCurl)
 library(XML)
 library(dplyr)
 library(jsonlite)
@@ -104,7 +106,7 @@ season_games <- season_games(2018)
 
 
 #write.csv(calendar, file = "./data/calendar.csv",row.names = FALSE)
-write.csv(boxscore, file = "./nfl-player-prop/data/boxscore.csv",row.names = FALSE)
-write.csv(player_games, file = "./nfl-player-prop/data/player_games.csv",row.names = FALSE)    
-write.csv(season_games, file = "./nfl-player-prop/data/season_games.csv",row.names = FALSE)   
+write.csv(boxscore, file = "nfl-player-prop/data/boxscore.csv",row.names = FALSE)
+write.csv(player_games, file = "nfl-player-prop/data/player_games.csv",row.names = FALSE)    
+write.csv(season_games, file = "nfl-player-prop/data/season_games.csv",row.names = FALSE)   
 
