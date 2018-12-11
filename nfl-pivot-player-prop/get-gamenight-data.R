@@ -1,29 +1,23 @@
 library(nflscrapR)
 library(tidyverse)
 
-
 # Setting Up -------------------------------------------------------------------
 
 options(stringsAsFactors = FALSE)
 Sys.setenv(TZ = "America/Chicago")
 options(width = 160)
 
-
 #enable pretty printing for data frames with knitr's kable in R 
-
 library(lemon)
 knit_print.data.frame <- lemon_print
 
 # set up ggplot2 theme
-my_theme <- theme_gray() +
-    theme(
-        axis.text.x = element_text(colour = "grey20", size = 10, face = "bold"),
-        axis.text.y = element_text(colour = "grey20", size = 10, face = "bold"),
-    ) + theme(legend.position="bottom")
-
+my_theme <- theme_bw() +
+    theme( legend.position = "bottom",
+           axis.text.x = element_text(colour = "grey20", size = 10, face = "bold"),
+           axis.text.y = element_text(colour = "grey20", size = 10, face = "bold"))
 theme_set(my_theme)
-
-# note: we do not care if the touchdown play was reversed 
+#scale_color_brewer(palette="Set1")
 
 
 # Function ---------------------------------------------------------------------
@@ -35,52 +29,61 @@ uniqueCol <- function(mydf){
 auto <- function(x) {
     x %>% 
         mutate_all( funs(replace(., is.na(.), "")) ) %>%
-         na.omit() %>%
+        na.omit() %>%
         uniqueCol() %>%
         data.frame() %>%
         print() 
 }
 
 base <- "https://raw.githubusercontent.com/nntrn/player-props/master/nfl-player-prop/data/"
-calendar <- read.csv(text=getURL(paste0(base,"calendar.csv")))
-
-#calendar$week = sprintf("wk %02d", as.integer(gsub("Week ", "", calendar$label)) ) 
 
 getWeek = function(dt){
+    calendar <- read_csv(paste0(base,"calendar.csv"))
     sapply(dt, function(x) {
-        # return week   format: wk.00
         y = calendar$label[x >= calendar$startDate & x <= calendar$endDate]
-        sprintf("wk.%02d", as.integer(gsub("Week ", "", y )) ) 
+        # sprintf("wk%02d", as.integer(gsub("Week ", "", y )) ) 
+        y = as.integer(gsub("Week ", "", y ))
     })
-    
 }
 
-#getWeek("2018-09-06")
+add_color = function(x){
+    if(missing(x)){ x = "Set1" }
+    require(RColorBrewer)
+    scale_color_brewer(palette=x)
+}
 
+# getWeek("2018-09-06")
 
-# USER INPUT -------------------------------------------------------------------
-# make sure to update the following values for the teams playing that night
-
-team1 <- "JAX"
-team2 <- "TEN"
 
 # Data -------------------------------------------------------------------------
 
 pbp_2018 <- season_play_by_play(2018)
 season_games <- season_games(2018)
 
+
+# USER INPUT -------------------------------------------------------------------
+# make sure to update the following values for the teams playing that night
+
+team1 <- "MIN"
+team2 <- "SEA"
+
+c(team1,team2) %in% unique(teams$posteam)
+
 teams <- 
     pbp_2018 %>% 
     filter(posteam == team1| posteam == team2) %>%
-    mutate( week = getWeek(Date) )
+    mutate(week.val = getWeek(Date),
+           week = sprintf("wk%02d", week.val)
+           )
 
 # PASS -------------------------------------------------------------------------
 
 # show quarterbacks for both teams
 teams %>%
-    group_by(Passer) %>%
+    group_by(Passer, week) %>%
     summarise(n=n()) %>%
     filter(n > 1) %>%
+    spread(week, n) %>%
     auto()
 
 ## get attempts, completes, incompletes 
@@ -90,50 +93,39 @@ pass_outcomes <-
     select(week, qtr, Passer, PassOutcome, Receiver) %>%
     group_by(week, Passer, PassOutcome) %>%
     summarise(n = n()) %>% spread(PassOutcome, n) %>%
-    mutate(Attempts = Complete + `Incomplete Pass`) %>%
-    auto()
-
-
-x %>% 
-    mutate(total = rowSums( .[ sapply(., is.numeric)] )) %>%
-    #filter(total > 0) %>%
-    arrange(desc(total)) %>%
-    #auto() %>%
-    View()
+    mutate(Attempts = Complete + `Incomplete Pass`)
 
 ## Show Completion / Attempts
 pass_outcomes %>%
     unite_("Complete_Attempts", c("Complete", "Attempts"),sep = "/") %>%
     select(-contains("Incomplete")) %>%
-    spread(week, Complete_Attempts) %>%
+    spread(Passer, Complete_Attempts) %>%
     mutate_all( funs(replace(., is.na(.), '')) ) %>% 
-    auto() %>%
-    View()
-
+    auto() 
 
 # ggpplot for pass outcome 
-teams %>%
-    group_by(Date, Passer, PassOutcome) %>%
-    summarise(contains("Complete")) %>%
-    filter(n > 1, !is.na(Passer)) %>%
-    spread(PassOutcome, n) %>%
+pass_outcomes %>%
+    group_by(Passer, week) %>%
     arrange(Passer) %>%
-    mutate(
-        Attempts = Complete + `Incomplete Pass`,
-        week = getWeek(Date) 
-        ) %>%
-    select(-`Incomplete Pass`) %>%
+    select(-contains("Incomplete")) %>%
     print() %>%
-   # auto() %>%
     # PLOT ---------------------
-    ggplot(aes(week, Attempts, color = Passer, label = Passer)) +
-    geom_hline(yintercept = 30, color = "black") +
+    ggplot(aes(Complete, Attempts, color = Passer, label = week)) +
+    geom_vline(xintercept = 30, color = "black") +
     geom_point(alpha=.4) +
-    geom_text(size=3) 
+    geom_text(size=3, vjust=-1.15) + 
+    add_color()
     
-
+pass_outcomes %>% 
+    ggplot(aes(Attempts, Complete, color = Passer, label=week) ) +
+    geom_boxplot() +
+    geom_point(alpha = .4) +
+    facet_wrap(Passer ~ .) + 
+    add_color()
 
 # TOUCHDOWNS -------------------------------------------------------------------
+# note: we do not care if the touchdown play was reversed 
+
 tds <- teams %>% 
     filter(Touchdown == "1") %>%
     mutate(scorer = ifelse(is.na(Receiver), Rusher, Receiver),
@@ -142,6 +134,13 @@ tds <- teams %>%
 
 # sum of touchdowns per quarter
 table(tds$qtr)
+
+tds %>% 
+    group_by(scorer, qtr) %>%
+    summarise(n=n()) %>%
+    spread(qtr, n) %>%
+    auto()
+    table()
 
 ## print rec (pass) + rush (run) touchdowns
 tds %>%
@@ -168,13 +167,13 @@ tds %>%
     unite_("Pass_Run", c("Pass", "Run"),sep = "_") %>%
     spread(week, Pass_Run) %>%
     arrange(qtr) %>% 
-    auto() %>%
+    auto() %>% 
     View()
 
 # RECEPTION COUNT  -------------------------------------------------------------
 
 ## show TD count by quarter
-table(dat$Receiver, dat$qtr)
-table( dat$Rusher, dat$qtr)
+table(tds$Receiver, tds$qtr)
+table( tds$Rusher, tds$qtr)
 
 
